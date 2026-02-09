@@ -4,23 +4,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>For Janki ❤️</title>
+    <title>For Janki</title>
     <style>
-        :root { --pink: #ff4d6d; --cyan: #00fffc; }
-        * { box-sizing: border-box; touch-action: none; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; background: #000; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; height: 100%; width: 100%; }
-
-        /* The Glitch Intro */
-        .glitch { font-size: 2rem; font-weight: bold; text-align: center; text-transform: uppercase; color: #fff; text-shadow: 2px 2px var(--pink), -2px -2px var(--cyan); animation: glitch-anim 0.2s infinite; }
-        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
-
-        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; align-items: center; justify-content: center; position: absolute; padding: 20px; text-align: center; }
+        body, html { margin: 0; padding: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100%; width: 100%; position: fixed; }
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; box-sizing: border-box; }
         .active { display: flex; }
+        
+        /* Version Tag to check if GitHub updated */
+        .debug-tag { position: absolute; top: 5px; left: 5px; font-size: 10px; color: #333; }
 
-        /* Game Board */
-        #game-container { width: 90vw; height: 60vh; background: #111; border: 3px solid #333; position: relative; overflow: hidden; border-radius: 10px; }
-        #basket { position: absolute; bottom: 10px; left: 50%; width: 70px; height: 50px; background: #4a2c2c; border-radius: 0 0 15px 15px; border: 2px solid #633; display: flex; justify-content: center; align-items: center; font-size: 30px; transform: translateX(-50%); z-index: 10; }
-        .falling-item { position: absolute; font-size: 35px; z-index: 5; top: -50px; }
+        .glitch { font-size: 2rem; color: #ff4d6d; text-transform: uppercase; text-shadow: 2px 2px #00fffc; font-weight: bold; }
+        
+        #game-box { width: 100%; max-width: 350px; height: 50vh; background: #111; border: 2px solid #444; position: relative; overflow: hidden; }
+        #basket { position: absolute; bottom: 5px; width: 70px; height: 50px; background: #4a2c2c; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 30px; transition: left 0.1s; }
+        .falling { position: absolute; font-size: 30px; top: -50px; }
+
+        .controls { display: flex; width: 100%; max-width: 350px; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 25px; background: #222; border: 1px solid #ff4d6d; color: white; font-size: 2rem; border-radius: 10px; -webkit-user-select: none; }
+        .start-btn { padding: 20px 40px; background: #ff4d6d; border: none; color: white; font-weight: bold; font-size: 1.2rem; border-radius: 50px; }
+    </style>
+</head>
+<body>
+    <div class="debug-tag">VERSION 5.0 - REFRESH IF YOU DONT SEE THIS</div>
+
+    <section id="s1" class="screen active"><h1 id="intro-txt" class="glitch">7th Feb: Rose Day</h1></section>
+    
+    <section id="s2" class="screen">
+        <h2 class="glitch">READY MY LADY?</h2>
+        <button class="start-btn" onclick="next(3)">YES, START</button>
+    </section>
+
+    <section id="s3" class="screen">
+        <p>CATCH THE TEDDIES!<br>Target: 2500 Points<br>Bomb = -500</p>
+        <button class="start-btn" onclick="startGame()">GO!</button>
+    </section>
+
+    <section id="s4" class="screen">
+        <div id="score-val" style="color:#ff4d6d; font-size: 1.5rem; margin-bottom: 10px;">SCORE: 0</div>
+        <div id="game-box"><div id="basket">🧺</div></div>
+        <div class="controls">
+            <button class="btn" onpointerdown="move(-25)">⬅️</button>
+            <button class="btn" onpointerdown="move(25)">➡️</button>
+        </div>
+    </section>
+
+    <section id="s5" class="screen"><div id="quote-area" class="glitch" style="font-size: 1.2rem;"></div></section>
+
+    <section id="s6" class="screen">
+        <h1 class="glitch">COMING SOON</h1>
+        <div id="timer" style="font-size: 3rem; color: #ff4d6d;">00:00:00</div>
+    </section>
+
+    <script>
+        let score = 0, bX = 140, gameOn = false;
+        const days = ["7th Feb: Rose Day", "8th Feb: Propose Day", "9th Feb: Chocolate Day", "10th Feb: TEDDY DAY"];
+
+        // Step 1: Intro
+        let d = 0;
+        const i = setInterval(() => {
+            d++;
+            if(d < 4) document.getElementById('intro-txt').innerText = days[d];
+            else { clearInterval(i); next(2); }
+        }, 3900);
+
+        function next(n) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('s'+n).classList.add('active');
+        }
+
+        // Step 2: Game
+        function move(amt) {
+            bX += amt;
+            if(bX < 0) bX = 0;
+            if(bX > 280) bX = 280;
+            document.getElementById('basket').style.left = bX + 'px';
+        }
+
+        function startGame() {
+            next(4); gameOn = true;
+            setInterval(spawn, 1000);
+            update();
+        }
+
+        function spawn() {
+            if(!gameOn) return;
+            const items = [{i:'✨',p:250},{i:'🐶',p:200},{i:'🧸',p:100},{i:'👩‍❤️‍👨',p:300},{i:'💣',p:-500}];
+            const data = items[Math.floor(Math.random()*items.length)];
+            const div = document.createElement('div');
+            div.className = 'falling';
+            div.innerHTML = data.i;
+            div.dataset.p = data.p;
+            div.style.left = Math.random() * 300 + 'px';
+            document.getElementById('game-box').appendChild(div);
+        }
+
+        function update() {
+            if(!gameOn) return;
+            const fallers = document.querySelectorAll('.falling');
+            const b = document.getElementById('basket').getBoundingClientRect();
+
+            fallers.forEach(f => {
+                let y = (parseFloat(f.style.top) || -50) + 4;
+                f.style.top = y + 'px';
+                let r = f.getBoundingClientRect();
+
+                if(r.bottom > b.top && r.left < b.right && r.right > b.left && r.top < b.bottom) {
+                    score += parseInt(f.dataset.p);
+                    document.getElementById('score-val').innerText = "SCORE: " + (score < 0 ? 0 : score);
+                    f.remove();
+                    if(score >= 2500) win();
+                } else if(y > 500) f.remove();
+            });
+            requestAnimationFrame(update);
+        }
+
+        // Step 3: Win
+        function win() {
+            gameOn = false; next(5);
+            const q = ["You're the best!","Hugs forever!","Janki & Aditya ❤️","Stay Cute!","My Teddy!","I Love You!","Always Together.","Warm Smiles.","Pure Magic.","Coming Soon..."];
+            let idx = 0;
+            const qi = setInterval(() => {
+                if(idx < 10) { document.getElementById('quote-area').innerText = q[idx]; idx++; }
+                else { clearInterval(qi); next(6); startFinal(); }
+            }, 3000);
+        }
+
+        function startFinal() {
+            const target = new Date("Feb 11, 2026 00:00:00").getTime();
+            setInterval(() => {
+                const diff = target - Date.now();
+                const h = Math.floor(diff/36e5), m = Math.floor((diff%36e5)/6e4), s = Math.floor((diff%6e4)/1000);
+                document.getElementById('timer').innerText = h+"h "+m+"m "+s+"s";
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
+
 
         /* Buttons */
         .controls { display: flex; gap: 20px; width: 90vw; margin-top: 20px; justify-content: center; }
